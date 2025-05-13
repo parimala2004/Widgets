@@ -130,3 +130,135 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
+class Screen extends StatefulWidget {
+  @override
+  State<Screen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<Screen> with TickerProviderStateMixin {
+  int selectedIndex=-1;
+  List<String> items = ['Apple','Orange','Mango','Grapes'];
+  bool isExpanded = false;
+  bool isVisible = true;
+
+  late AnimationController fadeController;
+  late AnimationController scaleController;
+
+  @override
+  void initState() {
+    super.initState();
+    fadeController = AnimationController(
+      duration: Duration(seconds: 2),
+      vsync: this,
+    );
+    scaleController = AnimationController(
+      duration: Duration(seconds: 1),
+      vsync: this,
+      lowerBound: 0.5,
+      upperBound: 1.0,
+    );
+
+    fadeController.forward();
+    scaleController.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    fadeController.dispose();
+    scaleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: TabBar(
+            tabs: [
+              Tab(text: "List"),
+              Tab(text: "Animations"),
+              Tab(text: "Page View"),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            ReorderableListView(
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex -= 1;
+                  final item = items.removeAt(oldIndex);
+                  items.insert(newIndex, item);
+                });
+              },
+              children: [
+                for (int index = 0; index < items.length; index++)
+                  ListTile(
+                    key: ValueKey(items[index]),
+                    title: Text(items[index]),
+                    tileColor: selectedIndex == index ? Colors.grey : Colors.greenAccent,
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                    },
+                  ),
+              ],
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  AnimatedContainer(
+                    duration: Duration(seconds: 1),
+                    width: isExpanded ? 200 : 100,
+                    height: isExpanded ? 300 : 100,
+                    color: isExpanded ? Colors.blue : Colors.orange,
+
+                  ),
+                  SizedBox(height: 10),
+                  AnimatedOpacity(
+                    opacity: isVisible ? 1.0 : 0.0,
+                    duration: Duration(seconds: 2),
+                    child: Text("Welocome to Food World",style: TextStyle(color: Colors.greenAccent,fontWeight:FontWeight.bold ),),
+                  ),
+                  SizedBox(height: 10),
+                  FadeTransition(
+                    opacity: fadeController,
+                    child: Text("Hii Foodie"),
+                  ),
+                  SizedBox(height: 10),
+                  ScaleTransition(
+                    scale: scaleController,
+                    child: Icon(Icons.star, size: 40),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isExpanded = !isExpanded;
+                        isVisible = !isVisible;
+                      });
+                    },
+                    child: Text("click here"),
+                  )
+                ],
+              ),
+            ),
+            PageView(
+              children: [
+                Center(child: Text("Hii")),
+                Center(child: InteractiveViewer(panEnabled: true, minScale: 0.5, maxScale: 2.0,
+                  child: Image.asset("assets/images/desrt.jpg", height: 200,),)
+                ),
+                Center(child: Text("Hello")),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
