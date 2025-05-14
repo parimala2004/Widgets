@@ -132,3 +132,126 @@ class SecondScreen extends StatelessWidget {
     
   }
 }
+class MyMainApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.amber,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.purpleAccent,
+          foregroundColor: Colors.greenAccent,
+        ),
+      ),
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  final StreamController<int> _streamController = StreamController<int>();
+
+  HomePage() {
+    Timer.periodic(Duration(seconds: 2), (timer) {
+      _streamController.sink.add(Random().nextInt(100));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('Hello'),
+          ),
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 100.0,
+                floating: false,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text('Sliver Demo'),
+                  background: CustomPaint(
+                    painter: CirclePainter(),
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: StreamBuilder<int>(
+                        stream: _streamController.stream,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(
+                              'Current Value: ${snapshot.data}',
+                              style: TextStyle(fontSize: 20),
+                            );
+                          } else {
+                            return CircularProgressIndicator();
+                          }
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: Text(' List Items:', style: TextStyle(fontWeight: FontWeight.bold),),
+                    ),
+                  ],
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) => ListTile(
+                    title: Text(' item $index'),
+                  ),
+                  childCount: 5,
+                ),
+              ),
+              SliverGrid(
+                delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                    return Container(
+                      margin: EdgeInsets.all(10),
+                      height: 200,
+                      width: 200,
+                      color: Colors.yellowAccent,
+                      child: Center(child: Text("Grid$index"),),
+
+                    );
+                  },
+                  childCount: 10,
+                ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: constraints.maxWidth > 600 ? 4 : 2,
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                  childAspectRatio: 1,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class CirclePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 50, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
