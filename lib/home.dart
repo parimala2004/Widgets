@@ -89,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               MainPage(),
              Screen(),
             MyMainApp(),
+            MyHomePage(),
         ]
           ),
         );
