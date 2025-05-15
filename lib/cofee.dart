@@ -387,3 +387,161 @@ class CirclePainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+  bool isChecked = false;
+  int? radioValue = 0;
+  bool switchValue = false;
+  DateTime? selectedDate;
+  TimeOfDay? selectedTime;
+
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        selectedTime = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Hello",style:TextStyle(fontWeight: FontWeight.bold,color: Colors.greenAccent) ,),
+        bottom: TabBar(
+          indicatorSize: TabBarIndicatorSize.tab,
+          indicatorAnimation: TabIndicatorAnimation.elastic,
+          controller: _tabController,
+          tabs: [
+            Tab(text: "Order Details"),
+            Tab(text: "Favourites"),
+          ],
+        ),
+      ),
+      body: TabBarView(
+
+        controller: _tabController,
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Card(
+                color: Colors.grey,
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Accept the terms"),
+                          Checkbox(
+                            value: isChecked,
+                            onChanged: (changed) {
+                              setState(() {
+                                isChecked = changed!;
+                              });
+                            },
+                          ),
+                          Text("Accept here"),
+                          Checkbox(
+
+                            value: isChecked,
+                            onChanged: (changed) {
+                              setState(() {
+                                isChecked = changed!;
+                              });
+                            },
+                          ),
+                          SizedBox(height: 10),
+                          Text("Radio Buttons"),
+                          Row(
+                            children: [
+                              Radio(
+                                value: 1,
+                                groupValue: radioValue,
+                                onChanged: (val) {
+                                  setState(() {
+                                    radioValue = val?.toInt();
+                                  });
+                                },
+                              ),
+                              Text("Male"),
+                              Radio(
+                                value: 2,
+                                groupValue: radioValue,
+                                onChanged: (val) {
+                                  setState(() {
+                                    radioValue = val?.toInt();
+                                  });
+                                },
+                              ),
+                              Text("Female"),
+                            ],
+                          ),
+                          SizedBox(height: 10),
+                          Text("Autosave"),
+                          Switch(
+                            value: switchValue,
+                            onChanged: (value) {
+                              setState(() {
+                                switchValue = value;
+                              });
+                            },),
+                          SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _pickDate,
+                            child: Text("Pick Date"),
+                          ),
+                          if (selectedDate != null)
+                            Text("Selected Date: ${selectedDate!.toLocal()}".split(
+                                ' ')[0]),
+                          SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _pickTime,
+                            child: Text("Pick Time"),
+                          ),
+                          if (selectedTime != null)
+                            Text("Selected Time: ${selectedTime!.format(context)}"),
+                        ],
+                      ),],
+                  ),
+                ),),
+            ),),
+          Center(child: Text("Welcome Here",style: TextStyle(color: Colors.redAccent,fontWeight: FontWeight.bold),)),
+        ],
+      ),
+    );
+  }}
